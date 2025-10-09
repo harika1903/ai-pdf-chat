@@ -1,47 +1,77 @@
+// ✅ worker.js
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { Worker } from 'bullmq';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { QdrantVectorStore } from '@langchain/qdrant';
-import { Document } from '@langchain/core/documents';
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
-import { CharacterTextSplitter } from '@langchain/textsplitters';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { HuggingFaceInferenceEmbeddings } from '@langchain/community/embeddings/hf';
 
 const worker = new Worker(
   'file-upload-queue',
   async (job) => {
-    console.log(`Job:`, job.data);
-    const data = JSON.parse(job.data);
-    /*
-    Path: data.path
-    read the pdf from path,
-    chunk the pdf,
-    call the openai embedding model for every chunk,
-    store the chunk in qdrant db
-    */
+    try {
+      console.log('Processing Job:', job.data);
+      const { path: filePath, fileId } = job.data;
 
-    // Load the PDF
-    const loader = new PDFLoader(data.path);
-    const docs = await loader.load();
+      // 1️⃣ Load PDF
+      const loader = new PDFLoader(filePath);
+      const docs = await loader.load();
+      console.log(`Loaded ${docs.length} document(s) from PDF: ${filePath}`);
 
-    const embeddings = new OpenAIEmbeddings({
-      model: 'text-embedding-3-small',
-      apiKey: '',
-    });
-
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(
-      embeddings,
-      {
-        url: 'http://localhost:6333',
-        collectionName: 'langchainjs-testing',
+      if (!docs.length) {
+        console.log('No documents found in PDF.');
+        return;
       }
-    );
-    await vectorStore.addDocuments(docs);
-    console.log(`All docs are added to vector store`);
+
+      // 2️⃣ Split into chunks
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
+      const chunks = await splitter.splitDocuments(docs);
+      console.log(`Split PDF into ${chunks.length} chunks`);
+
+      // 3️⃣ Add metadata
+      const chunksWithMetadata = chunks.map((chunk, idx) => ({
+        ...chunk,
+        metadata: { ...chunk.metadata, fileId, chunkId: idx },
+      }));
+
+      // 4️⃣ Create embeddings (Hugging Face)
+      const embeddings = new HuggingFaceInferenceEmbeddings({
+        apiKey: process.env.HF_API_KEY,
+        model: 'sentence-transformers/all-MiniLM-L6-v2',
+      });
+
+      // Test embedding on first chunk to catch errors early
+      const testVec = await embeddings.embedDocuments([chunksWithMetadata[0].pageContent]);
+      console.log('Sample embedding length:', testVec[0].length);
+
+      // 5️⃣ Store chunks in Qdrant
+      const vectorStore = await QdrantVectorStore.fromDocuments(
+        chunksWithMetadata,
+        embeddings,
+        {
+          url: process.env.QDRANT_URL || 'http://localhost:6333',
+          collectionName: 'ai-pdf-chat',
+        }
+      );
+
+      console.log(`✅ All chunks added to Qdrant for fileId: ${fileId}`);
+
+    } catch (err) {
+      console.error('Error processing job:', err);
+    }
   },
   {
-    concurrency: 100,
+    concurrency: 5,
     connection: {
-      host: 'localhost',
-      port: '6379',
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
     },
   }
 );
+
+console.log('Worker is listening for jobs...');
