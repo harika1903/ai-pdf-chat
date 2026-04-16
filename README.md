@@ -3,7 +3,7 @@
 An AI-powered application that allows users to interact with private PDF documents using natural language.
 Built using a Retrieval-Augmented Generation (RAG) pipeline to improve factual accuracy and reduce hallucinations in LLM responses.
 
----
+--- 
 
 ## 🚀 Key Highlights
 
