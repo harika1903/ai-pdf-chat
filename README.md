@@ -1,65 +1,122 @@
-# AI Chat with PDF (Full-Stack RAG Application)
+# AI Chat with PDF — RAG-based LLM System
 
-
-
-> A full-stack, AI-powered application that allows authenticated users to upload private PDF documents and have secure, interactive conversations about their content. This project solves the data privacy and hallucination problems inherent in public AI tools by using a Retrieval-Augmented Generation (RAG) pipeline.
+An AI-powered application that allows users to interact with private PDF documents using natural language.
+Built using a Retrieval-Augmented Generation (RAG) pipeline to improve factual accuracy and reduce hallucinations in LLM responses.
 
 ---
 
-### Key Features
+## 🚀 Key Highlights
 
-- Secure Authentication: User sign-up and login managed by Clerk for professional-grade security.
-- PDF Uploads: Secure file upload functionality handled by Multer on the backend.
-- AI-Powered Chat: A real-time chat interface where users can ask questions about their uploaded documents.
-- Factual, Source-Based Answers: The AI is constrained to answer questions based only on the content of the PDF, preventing it from making things up.
+* Built a full RAG pipeline using LangChain + Pinecone
+* Ensures factual answers by retrieving document context before generation
+* Secure authentication using Clerk
+* PDF upload and backend processing
+* Real-time chat interface for document-based Q&A
 
-### Architecture Overview: RAG Pipeline
+---
 
-The core of this project is a Retrieval-Augmented Generation (RAG) pipeline, orchestrated with LangChain. It works like a "super-librarian."
+## 🧠 How It Works
 
-1.  Ingestion Phase: When a user uploads a PDF, a background job is triggered.
-    - The document is loaded and split into smaller, semantically meaningful text chunks.
-    - The Hugging Face API is used to generate vector embeddings (numerical representations of meaning) for each chunk.
-    - These embeddings and their corresponding text are stored in a Pinecone vector database.
+### 1. Ingestion Phase
 
-2.  Retrieval & Generation Phase: When a user asks a question:
-    - The system creates an embedding of the user's question.
-    - It performs a semantic similarity search in Pinecone to retrieve the most relevant text chunks from the document.
-    - These retrieved chunks are injected as context into a final prompt, which is then sent to the Groq API to generate a factual, source-based answer.
+* User uploads a PDF
+* Document is split into smaller semantic chunks
+* Embeddings are generated using Hugging Face
+* Stored in Pinecone vector database
 
-### Tech Stack
+### 2. Retrieval + Generation Phase
 
-- Framework: Next.js
-- Language: TypeScript
-- Frontend: React.js, Tailwind CSS
-- Backend: Node.js, Express.js, Multer for uploads
-- AI Orchestration: LangChain
-- AI Models: Groq API (for chat), Hugging Face API (for embeddings)
-- Vector Database: Pinecone
-- Authentication: Clerk
+* User asks a question
+* Query is converted into an embedding
+* Relevant document chunks retrieved via similarity search
+* Context is injected into LLM prompt (Groq)
+* LLM generates a grounded, factual response
 
-### Setup and Installation
+---
 
-1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/your-username/ai-pdf-chat.git](https://github.com/your-username/ai-pdf-chat.git)
-    cd ai-pdf-chat
-    ```
+## 💡 Problem Solved
 
-2.  Install dependencies:
-    - `cd server && npm install`
-    - `cd client && npm install`
+LLMs often hallucinate when answering from documents.
+This system improves reliability by retrieving relevant document context before generating responses.
 
-3.  Set up environment variables:
-    - Create a `.env` file in the `server` directory and add your `PINECONE_API_KEY`, `PINECONE_ENVIRONMENT`, `HUGGINGFACE_API_KEY`, `GROQ_API_KEY`, and `CLERK_SECRET_KEY`.
-    - Create a `.env.local` file in the `client` directory and add your `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`.
+---
 
-4.  Run the application:
-    - In one terminal, start the server:
-        ```bash
-        cd server && npm run dev
-        ```
-    - In a second terminal, start the client:
-        ```bash
-        cd client && npm run dev
-        ```
+## 🛠 Tech Stack
+
+* Frontend: Next.js, React
+* Backend: Node.js, Express
+* AI: LangChain, Hugging Face (embeddings), Groq (LLM)
+* Vector Database: Pinecone
+* Authentication: Clerk
+* File Handling: Multer
+
+---
+
+## 📁 Project Structure
+
+ai-pdf-chat/
+│── client/        # Frontend (Next.js)
+│── server/        # Backend (Node.js + Express)
+│── README.md
+
+---
+
+## ⚙️ Setup & Installation
+
+### 1. Clone the repository
+
+git clone https://github.com/harika1903/ai-pdf-chat.git
+cd ai-pdf-chat
+
+---
+
+### 2. Install dependencies
+
+Backend:
+cd server
+npm install
+
+Frontend:
+cd ../client
+npm install
+
+---
+
+### 3. Configure environment variables
+
+Backend (server/.env):
+PINECONE_API_KEY=your_key
+PINECONE_ENVIRONMENT=your_env
+HUGGINGFACE_API_KEY=your_key
+GROQ_API_KEY=your_key
+CLERK_SECRET_KEY=your_key
+
+Frontend (client/.env.local):
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
+
+---
+
+### 4. Run the application
+
+Start backend:
+cd server
+npm run dev
+
+Start frontend:
+cd client
+npm run dev
+
+---
+
+## 📌 Notes
+
+* Designed to improve LLM reliability using retrieval-based grounding
+* Focused on backend + AI system design
+
+---
+
+## 👩‍💻 Author
+
+Harika Kodepaka
+GitHub: https://github.com/harika1903
+LinkedIn: https://www.linkedin.com/in/harika-kodepaka-95333225a/
