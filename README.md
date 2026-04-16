@@ -85,6 +85,7 @@ npm install
 ### 3. Configure environment variables
 
 Backend (server/.env):
+
 PINECONE_API_KEY=your_key
 PINECONE_ENVIRONMENT=your_env
 HUGGINGFACE_API_KEY=your_key
@@ -92,6 +93,7 @@ GROQ_API_KEY=your_key
 CLERK_SECRET_KEY=your_key
 
 Frontend (client/.env.local):
+
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
 
 ---
@@ -99,10 +101,12 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
 ### 4. Run the application
 
 Start backend:
+
 cd server
 npm run dev
 
 Start frontend:
+
 cd client
 npm run dev
 
@@ -118,5 +122,7 @@ npm run dev
 ## 👩‍💻 Author
 
 Harika Kodepaka
+
 GitHub: https://github.com/harika1903
+
 LinkedIn: https://www.linkedin.com/in/harika-kodepaka-95333225a/
